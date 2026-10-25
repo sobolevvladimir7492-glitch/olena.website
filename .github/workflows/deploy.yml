@@ -1,0 +1,97 @@
+name: Deploy to Namecheap
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: namecheap-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      SSH_KEY_PASSPHRASE: ${{ secrets.SSH_KEY_PASSPHRASE }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check settings
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for name in SSH_HOST SSH_USER SSH_PORT DEPLOY_PATH SSH_PRIVATE_KEY SSH_KNOWN_HOSTS; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing secret: $name"
+              exit 1
+            fi
+          done
+
+          [[ "$SSH_HOST" =~ ^[a-zA-Z0-9.-]+$ ]]
+          [[ "$SSH_USER" =~ ^[a-zA-Z0-9_]+$ ]]
+          [[ "$SSH_PORT" =~ ^[0-9]+$ ]]
+          [[ "$DEPLOY_PATH" =~ ^/home/$SSH_USER/[a-zA-Z0-9_./-]+/?$ ]]
+          [[ "$DEPLOY_PATH" != *".."* ]]
+
+      - name: Prepare website
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p "$RUNNER_TEMP/site"
+          cp -- *.html *.css *.js *.svg "$RUNNER_TEMP/site/"
+
+          for folder in images assets files documents; do
+            if [ -d "$folder" ]; then
+              cp -R -- "$folder" "$RUNNER_TEMP/site/"
+            fi
+          done
+
+          test -s "$RUNNER_TEMP/site/index.html"
+
+      - name: Upload to Namecheap
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/deploy_key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/deploy_key" "$HOME/.ssh/known_hosts"
+
+          cat > "$RUNNER_TEMP/askpass" <<'SCRIPT'
+          #!/bin/sh
+          printf '%s\n' "$SSH_KEY_PASSPHRASE"
+          SCRIPT
+          chmod 700 "$RUNNER_TEMP/askpass"
+
+          eval "$(ssh-agent -s)" > /dev/null
+          trap 'ssh-agent -k >/dev/null; rm -f "$HOME/.ssh/deploy_key" "$RUNNER_TEMP/askpass"' EXIT
+
+          export SSH_ASKPASS="$RUNNER_TEMP/askpass"
+          export SSH_ASKPASS_REQUIRE=force
+          export DISPLAY=:0
+          ssh-add "$HOME/.ssh/deploy_key" < /dev/null
+
+          tar -C "$RUNNER_TEMP/site" -cf - . | ssh \
+            -p "$SSH_PORT" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=20 \
+            "$SSH_USER@$SSH_HOST" \
+            "test -d '$DEPLOY_PATH' && tar -xf - -C '$DEPLOY_PATH'"
