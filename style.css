@@ -67,13 +67,13 @@ h2 { font-size: 28px; line-height: 1.2; }
 .hero h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(48px, 8vw, 112px); line-height: .9; letter-spacing: -.025em; }
 .hero .role { margin-top: 22px; font-size: clamp(17px, 1.9vw, 20px); font-weight: 500; letter-spacing: .01em; color: var(--ink); }
 .hero .fields { margin-top: 4px; font-size: clamp(14px, 1.5vw, 16px); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-.drawing { margin: clamp(-60px, -4vw, -16px) auto 0; }
+.drawing { margin: clamp(-60px, -4vw, -16px) auto 0; padding-bottom: 24px; }
 .drawing .sketch { max-height: 460px; object-fit: contain; }
 .drawing figcaption { padding-block: 6px 18px; text-align: right; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .sketch { display: block; width: 100%; height: auto; mix-blend-mode: var(--sketch-blend); background: var(--sketch-paper); }
 
-.intro { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 64px; padding-top: 72px; align-items: start; }
-.portrait { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 18%; display: block; }
+.intro { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 72px); padding-top: 72px; align-items: start; }
+.portrait { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 30%; display: block; position: sticky; top: 90px; }
 .intro .text { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .intro .lead { font-family: var(--serif); font-size: clamp(25px, 3vw, 34px); line-height: 1.25; max-width: 30ch; }
 .intro .lead em { color: var(--accent); }
@@ -146,6 +146,13 @@ h2 { font-size: 28px; line-height: 1.2; }
 .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; }
 .grid2 > div { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .grid2 h2:not(:first-child) { margin-top: 36px; }
+/* CV: one column, each entry on one line (years · role · institution) */
+#cv .grid2 { grid-template-columns: minmax(0, 1fr); gap: 0; }
+#cv .grid2 > div + div { margin-top: 36px; }
+#cv .list .c { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 2px 32px; align-items: baseline; }
+#cv .list .s { font-size: 15px; }
+#cv .grid2 > div > p { max-width: none; }
+@media (max-width: 680px) { #cv .list .c { grid-template-columns: minmax(0, 1fr); } }
 
 /* contact */
 .contact { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; }
@@ -169,7 +176,7 @@ footer a { color: var(--muted); }
   .brand { padding-bottom: 0; }
   .tabs { gap: 22px; width: 100%; }
   .intro { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-top: 48px; }
-  .portrait { width: 180px; }
+  .portrait { width: 100%; max-width: 440px; position: static; }
   .cards, .cards.two, .areas, .areas.four, .jump, .contact { grid-template-columns: minmax(0, 1fr); }
   .list li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .view-head { padding-top: 48px; }
