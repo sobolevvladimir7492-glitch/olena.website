@@ -2,6 +2,7 @@ html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
+picture { display: contents; }
 /* Layout: thin top bar of text tabs; each tab is its own view (#home, #research …).
    Editorial treatment: square photographs, hairline rules, serif headlines, no pills or boxes.
    Palette: limestone and sea-glass neutrals, Black Sea ink, one cherry accent. */
@@ -74,7 +75,7 @@ h2 { font-size: 28px; line-height: 1.2; }
 .sketch { display: block; width: 100%; height: auto; mix-blend-mode: var(--sketch-blend); background: var(--sketch-paper); }
 
 .intro { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 72px); padding-top: 72px; align-items: start; }
-.portrait { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 30%; display: block; position: sticky; top: 90px; }
+.portrait { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 30%; display: block; position: sticky; top: 90px; }
 .intro .text { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .intro .lead { font-family: var(--serif); font-size: clamp(25px, 3vw, 34px); line-height: 1.25; max-width: 30ch; }
 .intro .lead em { color: var(--accent); }
