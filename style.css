@@ -201,3 +201,6 @@ footer a { color: var(--muted); }
   .block { padding-top: 56px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Ukrainian page: Cyrillic-capable faces */
+html[lang="uk"] { --serif: "Source Serif 4", Georgia, "Times New Roman", serif; --sans: "Golos Text", "Helvetica Neue", Arial, sans-serif; }
