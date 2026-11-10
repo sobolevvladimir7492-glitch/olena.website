@@ -1,0 +1,21 @@
+name: Site reachability check
+on:
+  push:
+    branches: [diag-site-check]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: DNS
+        run: |
+          dig +short A olena-sobolieva.info || true
+          dig +short A www.olena-sobolieva.info || true
+          dig +short NS olena-sobolieva.info || true
+      - name: HTTPS
+        run: |
+          for u in https://olena-sobolieva.info/ https://www.olena-sobolieva.info/ http://olena-sobolieva.info/ https://olena-sobolieva.info/uk.html; do
+            echo "== $u"; curl -sS -o /dev/null -m 20 -w "%{http_code} ip=%{remote_ip} t=%{time_total}s\n" "$u" || true
+          done
